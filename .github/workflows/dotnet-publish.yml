@@ -1,0 +1,52 @@
+# Name of the workflow
+name: Build, Test, and Publish NuGet Package
+
+# Run on every push to any branch, AND on pull requests to 'main'
+on:
+  push:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-test-publish:
+    # Use the latest Ubuntu runner
+    runs-on: ubuntu-latest
+
+    # Set permissions for the GITHUB_TOKEN to allow writing packages
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      # 1. Check out your repository's code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      # 2. Setup the .NET 6 SDK (matches your test project)
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+      
+      # 3. Restore dependencies for the solution
+      - name: Restore dependencies
+        run: dotnet restore Morpeh.BoilerplateGenerationProcessor.sln
+      
+      # 4. Build the entire solution in Release configuration
+      - name: Build
+        run: dotnet build Morpeh.BoilerplateGenerationProcessor.sln --configuration Release --no-restore
+      
+      # 5. NEW: Run tests
+      # This will use the test project defined in your solution
+      - name: Run tests
+        run: dotnet test Morpeh.BoilerplateGenerationProcessor.Tests/Morpeh.BoilerplateGenerationProcessor.Tests.csproj --configuration Release --no-build
+      
+      # 6. Pack the generator project (only if build and tests passed)
+      - name: Pack
+        run: dotnet pack Morpeh.BoilerplateGenerationProcessor/Morpeh.BoilerplateGenerationProcessor.csproj --configuration Release --no-build
+      
+      # 7. MODIFIED: Publish the .nupkg file
+      # This step will ONLY run on a push event to the 'main' branch
+      - name: Publish to GitHub Packages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: dotnet nuget push "Morpeh.BoilerplateGenerationProcessor/bin/Release/*.nupkg" -k ${{ secrets.GITHUB_TOKEN }} -s "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
