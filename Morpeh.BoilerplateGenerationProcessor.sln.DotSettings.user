@@ -6,18 +6,13 @@
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
   &lt;Assembly Path="C:\Users\Konrad\RiderProjects\Apostasy.GenerationProcessor\Morpeh.BoilerplateGenerationProcessor\bin\Release\netstandard2.0\Morpeh.BoilerplateGenerationProcessor.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=3bd2ee2b_002D8863_002D4e8e_002Dbe9d_002D9af25926f53b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="GeneratorTests #3" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=2c1c8b71_002D31e2_002D46be_002D8eb1_002Dc2483957abfc/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="GeneratorTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;MSTest::0F9CFD90-8453-4652-8FFA-9185C233056B::net6.0::Morpeh.BoilerplateGenerationProcessor.Tests.GeneratorTests&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=5d5b2d02_002D3df3_002D4b0a_002D9241_002D8d3c73830c8a/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="GeneratorTests #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;MSTest::0F9CFD90-8453-4652-8FFA-9185C233056B::net6.0::Morpeh.BoilerplateGenerationProcessor.Tests.GeneratorTests&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=f624411a_002Db905_002D4c7b_002D8238_002D76036c2a7cfa/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="GeneratorTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;MSTest::0F9CFD90-8453-4652-8FFA-9185C233056B::net6.0::Morpeh.BoilerplateGenerationProcessor.Tests.GeneratorTests&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
+	
+	
+	
+	
+	</wpf:ResourceDictionary>

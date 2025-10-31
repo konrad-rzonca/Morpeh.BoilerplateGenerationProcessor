@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,10 +29,9 @@ public class AttributeGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         // Provider for types that are Morpeh targets but are missing the 'partial' keyword.
-        IncrementalValuesProvider<INamedTypeSymbol> nonPartialMorpehTypesProvider = context.SyntaxProvider
+        var nonPartialMorpehTypesProvider = context.SyntaxProvider
             .CreateSyntaxProvider(
-                static (s, _) => s is TypeDeclarationSyntax { BaseList: not null, Arity: 0 } tds &&
-                                 !tds.Modifiers.Any(SyntaxKind.PartialKeyword),
+                static (s, _) => s is TypeDeclarationSyntax { BaseList: not null, Arity: 0 } tds && !tds.Modifiers.Any(SyntaxKind.PartialKeyword),
                 static (ctx, _) => GetNonPartialMorpehTarget(ctx))
             .Where(static symbol => symbol is not null);
 
@@ -40,7 +40,7 @@ public class AttributeGenerator : IIncrementalGenerator
                 NonPartialTypeWarning, symbol!.Locations[0], symbol.Name)));
 
         // Provider for types that ARE partial and need attributes generated.
-        IncrementalValuesProvider<TypeDeclarationInfo?> partialMorpehTypesProvider = context.SyntaxProvider
+        var partialMorpehTypesProvider = context.SyntaxProvider
             .CreateSyntaxProvider(
                 static (s, _) => s is TypeDeclarationSyntax tds && tds.Modifiers.Any(SyntaxKind.PartialKeyword) &&
                                  tds.BaseList != null,
@@ -49,9 +49,9 @@ public class AttributeGenerator : IIncrementalGenerator
 
         context.RegisterSourceOutput(partialMorpehTypesProvider,
             static (spc, source) => Execute(spc, source!.Value));
-
+            
         // Provider for a hint on partial structs that are not IComponents.
-        IncrementalValuesProvider<INamedTypeSymbol> potentialComponentsProvider = context.SyntaxProvider
+        var potentialComponentsProvider = context.SyntaxProvider
             .CreateSyntaxProvider(
                 static (s, _) => s is StructDeclarationSyntax sds && sds.Modifiers.Any(SyntaxKind.PartialKeyword),
                 static (ctx, _) => GetPotentialMorpehComponent(ctx))
@@ -66,7 +66,9 @@ public class AttributeGenerator : IIncrementalGenerator
     {
         var structDeclarationSyntax = (StructDeclarationSyntax)context.Node;
         if (context.SemanticModel.GetDeclaredSymbol(structDeclarationSyntax) is not INamedTypeSymbol typeSymbol)
+        {
             return null;
+        }
 
         // Check if it already implements IComponent. If so, it's not a "potential" component; it's a real one.
         return typeSymbol.AllInterfaces.Any(iface => iface.ToDisplayString() == IComponentFullName) ? null : typeSymbol;
@@ -76,7 +78,9 @@ public class AttributeGenerator : IIncrementalGenerator
     {
         var typeDeclarationSyntax = (TypeDeclarationSyntax)context.Node;
         if (context.SemanticModel.GetDeclaredSymbol(typeDeclarationSyntax) is not INamedTypeSymbol typeSymbol)
+        {
             return null;
+        }
 
         // Check if it's a Morpeh component or system.
         return IsMorpehTarget(typeSymbol, out _) ? typeSymbol : null;
@@ -90,12 +94,18 @@ public class AttributeGenerator : IIncrementalGenerator
             if (context.SemanticModel.GetDeclaredSymbol(typeDeclarationSyntax) is not INamedTypeSymbol typeSymbol)
                 return null;
 
-            if (!IsCandidateForGeneration(typeSymbol) || !IsMorpehTarget(typeSymbol, out _)) return null;
+            if (!IsCandidateForGeneration(typeSymbol) || !IsMorpehTarget(typeSymbol, out _))
+            {
+                return null;
+            }
 
             bool needsSerializable = !HasAttribute(typeSymbol, SerializableAttributeFullName);
             bool needsIl2Cpp = !HasAttribute(typeSymbol, Il2CppSetOptionAttributeFullName);
 
-            if (!needsSerializable && !needsIl2Cpp) return null;
+            if (!needsSerializable && !needsIl2Cpp)
+            {
+                return null;
+            }
 
             return CreateSuccessInfo(typeSymbol, typeDeclarationSyntax, needsSerializable, needsIl2Cpp);
         }
@@ -109,20 +119,23 @@ public class AttributeGenerator : IIncrementalGenerator
 
     private static bool IsCandidateForGeneration(INamedTypeSymbol typeSymbol)
     {
-        if (typeSymbol.IsStatic) return false;
+        if (typeSymbol.IsStatic)
+        {
+            return false;
+        }
 
         return typeSymbol.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal;
     }
 
     private static bool IsMorpehTarget(INamedTypeSymbol typeSymbol, out MorpehTypeInfo morpehTypeInfo)
     {
-        bool implementsIComponent =
-            typeSymbol.AllInterfaces.Any(iface => iface.ToDisplayString() == IComponentFullName);
+        bool implementsIComponent = typeSymbol.AllInterfaces.Any(iface => iface.ToDisplayString() == IComponentFullName);
 
-        var implementsMorpehSystem = false;
+        bool implementsMorpehSystem = false;
         if (!implementsIComponent) // Optimization: a type won't be both a component and a system
-            implementsMorpehSystem =
-                typeSymbol.AllInterfaces.Any(iface => MorpehSystemInterfaces.Contains(iface.ToDisplayString()));
+        {
+            implementsMorpehSystem = typeSymbol.AllInterfaces.Any(iface => MorpehSystemInterfaces.Contains(iface.ToDisplayString()));
+        }
 
         bool isComponent = typeSymbol.TypeKind == TypeKind.Struct && implementsIComponent;
         bool isSystem = typeSymbol.TypeKind == TypeKind.Class && implementsMorpehSystem;
@@ -227,7 +240,7 @@ public class AttributeGenerator : IIncrementalGenerator
     private static List<ParentClassInfo> GetParentClassHierarchy(TypeDeclarationSyntax typeSyntax)
     {
         var hierarchy = new List<ParentClassInfo>();
-        for (SyntaxNode parent = typeSyntax.Parent;
+        for (SyntaxNode? parent = typeSyntax.Parent;
              parent is ClassDeclarationSyntax classSyntax;
              parent = classSyntax.Parent)
         {
