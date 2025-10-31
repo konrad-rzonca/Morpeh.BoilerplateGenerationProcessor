@@ -4,6 +4,7 @@ name: Build, Test, and Create Release
 on:
   push:
     branches: [ "master" ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ "master" ]
 
