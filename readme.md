@@ -41,26 +41,22 @@ The generator applies attributes to any non-static, `partial` type that implemen
 ### Morpeh Components
 Must be `partial`.
 
-```csharp
-// Before
-public struct MyComponent : IComponent { /* ... */ }
-.
-// After applying fix (making it partial)
-public partial struct MyComponent : IComponent { /* ... */ }
-```
+    // Before
+    public struct MyComponent : IComponent { /* ... */ }
+    .
+    // After applying fix (making it partial)
+    public partial struct MyComponent : IComponent { /* ... */ }
 
 ---
 
 ### Morpeh Systems
 Must be `partial`.
 
-```csharp
-// Before
-public sealed class MySystem : ISystem { /* ... */ }
-
-// After applying fix (making it partial)
-public sealed partial class MySystem : ISystem { /* ... */ }
-```
+    // Before
+    public sealed class MySystem : ISystem { /* ... */ }
+    
+    // After applying fix (making it partial)
+    public sealed partial class MySystem : ISystem { /* ... */ }
 
 ---
 
@@ -82,17 +78,19 @@ public sealed partial class MySystem : ISystem { /* ... */ }
 
 ## 📦 How to Publish a New Version (for Developers)
 
-This repository is configured with a GitHub Action (`.github/workflows/dotnet-release.yml`) that automatically builds, tests, and creates a release.
+This repository is configured with a GitHub Action (`.github/workflows/release.yml`) that automatically builds, tests, and creates a release.
 
 To publish a new version:
 1.  Ensure your code changes are committed to the `main` branch.
 2.  Create a new Git tag that starts with `v` (e.g., `v1.0.1`, `v1.1.0`).
-    ```sh
-    git tag v1.0.1
-    ```
-3.  Push the tag to GitHub.
-    ```sh
-    git push origin v1.0.1
-    ```
 
-The GitHub Action will detect this new tag, run the build and tests, and then automatically create a new GitHub Release. It will attach the properly-built `Morpeh.Boilerplate.SourceGenerator.zip` file to that release, making it available for users to download.
+        git tag v1.0.1
+
+3.  Push the tag to GitHub.
+
+        git push origin v1.0.1
+
+
+The GitHub Action will detect this new tag, run the build and tests, and then automatically create a new GitHub Release. It will attach two files:
+* `Morpeh.Boilerplate.SourceGenerator.zip`: For manual installation in Unity.
+* `Morpeh.Boilerplate.SourceGenerator.[Version].nupkg`: For installation via NuGet or OpenUPM.

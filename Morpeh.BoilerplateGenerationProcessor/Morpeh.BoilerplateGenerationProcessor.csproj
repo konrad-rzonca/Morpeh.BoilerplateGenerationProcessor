@@ -9,12 +9,21 @@
         <IsPackable>true</IsPackable>
         <PackageId>Morpeh.Boilerplate.SourceGenerator</PackageId>
         <Description>Generates IL2CPP optimization attributes for Morpeh components and systems.</Description>
-        <Authors>YourName</Authors>
+
+        <Authors>konrad-rzonca</Authors>
+
         <IncludeBuildOutput>false</IncludeBuildOutput>
 
         <NoWarn>$(NoWarn);CS1591</NoWarn>
 
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/konrad-rzonca/Morpeh.BoilerplateGenerationProcessor</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/konrad-rzonca/Morpeh.BoilerplateGenerationProcessor.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>morpeh;ecs;unity;source-generator;il2cpp</PackageTags>
+        <PackageReadmeFile>readme.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -36,6 +45,10 @@
         <None Include="$(OutputPath)\System.Reflection.Metadata.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
         <None Include="$(OutputPath)\System.Text.Encoding.CodePages.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
         <None Include="$(OutputPath)\System.Threading.Tasks.Extensions.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\readme.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
 </Project>
