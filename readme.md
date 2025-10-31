@@ -23,7 +23,7 @@ This is the simplest way to install the generator. It does **not** require any p
 6.  **Tag the Analyzer.**
     * Select `Morpeh.BoilerplateGenerationProcessor.dll` only.
     * In the Inspector, find the "Asset Labels" section at the bottom.
-    * Type **`RoslynAnalyzer`** into the box and press Enter.
+    * Type **`RoslynAnalyzer`** into the box and press Enter - [Unity guidelines](https://docs.unity3d.com/6000.2/Documentation/Manual/install-existing-analyzer.html).
     * Click **Apply** again.
 
 7.  **Restart the Unity Editor.** The generator is now active and will automatically process your Morpeh files.
