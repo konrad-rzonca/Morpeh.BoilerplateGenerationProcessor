@@ -21,7 +21,7 @@ This is the simplest way to install the generator. It does **not** require any p
     * Click **Apply**.
 
 6.  **Tag the Analyzer.**
-    * With all the DLLs still selected, deselect all of them **except** for `Morpeh.BoilerplateGenerationProcessor.dll`.
+    * Select `Morpeh.BoilerplateGenerationProcessor.dll` only.
     * In the Inspector, find the "Asset Labels" section at the bottom.
     * Type **`RoslynAnalyzer`** into the box and press Enter.
     * Click **Apply** again.
