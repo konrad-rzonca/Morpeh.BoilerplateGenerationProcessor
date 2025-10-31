@@ -1,6 +1,6 @@
 # Morpeh.BoilerplateGenerationProcessor
 
-A Roslyn Source Generator for Unity that automatically adds performance-critical attributes (`[Serializable]`, `[Il2CppSetOption]`) to Morpeh components, systems, and other targeted types. This reduces boilerplate and improves runtime performance in IL2CPP builds.
+A Roslyn Source Generator for Unity that automatically adds performance-critical attributes (`[Serializable]`, `[Il2CppSetOption]`) to Morpeh components and systems. This reduces boilerplate and improves runtime performance in IL2CPP builds.
 
 ## Installation & Build
 
@@ -16,20 +16,33 @@ A Roslyn Source Generator for Unity that automatically adds performance-critical
 
 ## Usage Rules
 
-The generator applies attributes to any non-static type marked with the `partial` keyword.
+The generator applies attributes to any non-static, `partial` type that implements one of the following Morpeh interfaces:
+- `Scellecs.Morpeh.IComponent`
+- `Scellecs.Morpeh.ISystem` (and related interfaces like `IInitializer`, `IFixedSystem`, etc.)
+
 
 -   **Morpeh Components:** Must be `partial`.
     ```csharp
+    // Before
+    public struct MyComponent : IComponent { /* ... */ }
+    
+    // After applying fix (making it partial)
     public partial struct MyComponent : IComponent { /* ... */ }
     ```
 
 -   **Morpeh Systems:** Must be `partial`.
     ```csharp
+    // Before
+    public sealed class MySystem : ISystem { /* ... */ }
+
+    // After applying fix (making it partial)
     public sealed partial class MySystem : ISystem { /* ... */ }
     ```
 
--   **Static Classes:** **Must be annotated manually.** The generator cannot process `static` classes as they cannot be `partial`.
+-   **Static Classes:** **Must be annotated manually.** The generator cannot process `static` classes because they cannot be `partial`.
 
 ### Diagnostics
 
-If a Morpeh component or system is missing the `partial` keyword, the generator will produce a warning (`APC001`) in the Unity Console.
+-   **MORPEH001 (Warning):** If a Morpeh component or system is missing the `partial` keyword, the generator will produce a warning in the Unity Console.
+-   **MORPEH002 (Error):** An internal generator error occurred during processing.
+-   **MORPEH003 (Info):** A `partial struct` is found that does not implement `IComponent`, suggesting it might be a candidate for being a Morpeh component.

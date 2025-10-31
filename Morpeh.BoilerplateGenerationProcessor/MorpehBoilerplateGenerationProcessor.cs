@@ -14,7 +14,7 @@ namespace Morpeh.BoilerplateGenerationProcessor;
 public class AttributeGenerator : IIncrementalGenerator
 {
     private const string IComponentFullName = "Scellecs.Morpeh.IComponent";
-    private const string Il2CppSetOptionAttributeFullName = "Unity.IL2CPP.CompilerServices.IlCppSetOptionAttribute";
+    private const string Il2CppSetOptionAttributeFullName = "Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute";
     private const string SerializableAttributeFullName = "System.SerializableAttribute";
 
     private static readonly HashSet<string> MorpehSystemInterfaces = new()
@@ -29,9 +29,10 @@ public class AttributeGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         // Provider for types that are Morpeh targets but are missing the 'partial' keyword.
-        var nonPartialMorpehTypesProvider = context.SyntaxProvider
+        IncrementalValuesProvider<INamedTypeSymbol?> nonPartialMorpehTypesProvider = context.SyntaxProvider
             .CreateSyntaxProvider(
-                static (s, _) => s is TypeDeclarationSyntax { BaseList: not null, Arity: 0 } tds && !tds.Modifiers.Any(SyntaxKind.PartialKeyword),
+                static (s, _) => s is TypeDeclarationSyntax { BaseList: not null, Arity: 0 } tds &&
+                                 !tds.Modifiers.Any(SyntaxKind.PartialKeyword),
                 static (ctx, _) => GetNonPartialMorpehTarget(ctx))
             .Where(static symbol => symbol is not null);
 
@@ -40,7 +41,7 @@ public class AttributeGenerator : IIncrementalGenerator
                 NonPartialTypeWarning, symbol!.Locations[0], symbol.Name)));
 
         // Provider for types that ARE partial and need attributes generated.
-        var partialMorpehTypesProvider = context.SyntaxProvider
+        IncrementalValuesProvider<TypeDeclarationInfo?> partialMorpehTypesProvider = context.SyntaxProvider
             .CreateSyntaxProvider(
                 static (s, _) => s is TypeDeclarationSyntax tds && tds.Modifiers.Any(SyntaxKind.PartialKeyword) &&
                                  tds.BaseList != null,
@@ -49,9 +50,9 @@ public class AttributeGenerator : IIncrementalGenerator
 
         context.RegisterSourceOutput(partialMorpehTypesProvider,
             static (spc, source) => Execute(spc, source!.Value));
-            
+
         // Provider for a hint on partial structs that are not IComponents.
-        var potentialComponentsProvider = context.SyntaxProvider
+        IncrementalValuesProvider<INamedTypeSymbol?> potentialComponentsProvider = context.SyntaxProvider
             .CreateSyntaxProvider(
                 static (s, _) => s is StructDeclarationSyntax sds && sds.Modifiers.Any(SyntaxKind.PartialKeyword),
                 static (ctx, _) => GetPotentialMorpehComponent(ctx))
@@ -66,9 +67,7 @@ public class AttributeGenerator : IIncrementalGenerator
     {
         var structDeclarationSyntax = (StructDeclarationSyntax)context.Node;
         if (context.SemanticModel.GetDeclaredSymbol(structDeclarationSyntax) is not INamedTypeSymbol typeSymbol)
-        {
             return null;
-        }
 
         // Check if it already implements IComponent. If so, it's not a "potential" component; it's a real one.
         return typeSymbol.AllInterfaces.Any(iface => iface.ToDisplayString() == IComponentFullName) ? null : typeSymbol;
@@ -78,9 +77,7 @@ public class AttributeGenerator : IIncrementalGenerator
     {
         var typeDeclarationSyntax = (TypeDeclarationSyntax)context.Node;
         if (context.SemanticModel.GetDeclaredSymbol(typeDeclarationSyntax) is not INamedTypeSymbol typeSymbol)
-        {
             return null;
-        }
 
         // Check if it's a Morpeh component or system.
         return IsMorpehTarget(typeSymbol, out _) ? typeSymbol : null;
@@ -94,20 +91,22 @@ public class AttributeGenerator : IIncrementalGenerator
             if (context.SemanticModel.GetDeclaredSymbol(typeDeclarationSyntax) is not INamedTypeSymbol typeSymbol)
                 return null;
 
-            if (!IsCandidateForGeneration(typeSymbol) || !IsMorpehTarget(typeSymbol, out _))
-            {
-                return null;
-            }
+            if (!IsCandidateForGeneration(typeSymbol) || !IsMorpehTarget(typeSymbol, out _)) return null;
 
             bool needsSerializable = !HasAttribute(typeSymbol, SerializableAttributeFullName);
-            bool needsIl2Cpp = !HasAttribute(typeSymbol, Il2CppSetOptionAttributeFullName);
 
-            if (!needsSerializable && !needsIl2Cpp)
-            {
-                return null;
-            }
+            HashSet<string> existingIl2CppOptions = GetExistingIl2CppOptions(typeSymbol);
+            bool needsNullChecks = !existingIl2CppOptions.Contains("NullChecks");
+            bool needsArrayBoundsChecks = !existingIl2CppOptions.Contains("ArrayBoundsChecks");
+            bool needsDivideByZeroChecks = !existingIl2CppOptions.Contains("DivideByZeroChecks");
 
-            return CreateSuccessInfo(typeSymbol, typeDeclarationSyntax, needsSerializable, needsIl2Cpp);
+            bool needsAnyAttribute = needsSerializable || needsNullChecks || needsArrayBoundsChecks ||
+                                     needsDivideByZeroChecks;
+
+            if (!needsAnyAttribute) return null;
+
+            return CreateSuccessInfo(typeSymbol, typeDeclarationSyntax, needsSerializable, needsNullChecks,
+                needsArrayBoundsChecks, needsDivideByZeroChecks);
         }
         catch (Exception ex)
         {
@@ -119,23 +118,20 @@ public class AttributeGenerator : IIncrementalGenerator
 
     private static bool IsCandidateForGeneration(INamedTypeSymbol typeSymbol)
     {
-        if (typeSymbol.IsStatic)
-        {
-            return false;
-        }
+        if (typeSymbol.IsStatic) return false;
 
         return typeSymbol.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal;
     }
 
     private static bool IsMorpehTarget(INamedTypeSymbol typeSymbol, out MorpehTypeInfo morpehTypeInfo)
     {
-        bool implementsIComponent = typeSymbol.AllInterfaces.Any(iface => iface.ToDisplayString() == IComponentFullName);
+        bool implementsIComponent =
+            typeSymbol.AllInterfaces.Any(iface => iface.ToDisplayString() == IComponentFullName);
 
-        bool implementsMorpehSystem = false;
+        var implementsMorpehSystem = false;
         if (!implementsIComponent) // Optimization: a type won't be both a component and a system
-        {
-            implementsMorpehSystem = typeSymbol.AllInterfaces.Any(iface => MorpehSystemInterfaces.Contains(iface.ToDisplayString()));
-        }
+            implementsMorpehSystem =
+                typeSymbol.AllInterfaces.Any(iface => MorpehSystemInterfaces.Contains(iface.ToDisplayString()));
 
         bool isComponent = typeSymbol.TypeKind == TypeKind.Struct && implementsIComponent;
         bool isSystem = typeSymbol.TypeKind == TypeKind.Class && implementsMorpehSystem;
@@ -149,8 +145,33 @@ public class AttributeGenerator : IIncrementalGenerator
         return typeSymbol.GetAttributes().Any(attr => attr.AttributeClass?.ToDisplayString() == attributeFullName);
     }
 
+    private static HashSet<string> GetExistingIl2CppOptions(INamedTypeSymbol typeSymbol)
+    {
+        var options = new HashSet<string>();
+        foreach (AttributeData? attr in typeSymbol.GetAttributes())
+        {
+            if (attr.AttributeClass?.ToDisplayString() != Il2CppSetOptionAttributeFullName ||
+                attr.ConstructorArguments.Length != 2) continue;
+
+            TypedConstant optionArgument = attr.ConstructorArguments[0];
+            if (optionArgument.Kind != TypedConstantKind.Enum || optionArgument.Type?.Name != "Option") continue;
+
+            if (optionArgument.Type is not INamedTypeSymbol enumType) continue;
+
+            foreach (ISymbol? member in enumType.GetMembers())
+                if (member is IFieldSymbol { IsConst: true } field && field.ConstantValue is not null &&
+                    field.ConstantValue.Equals(optionArgument.Value))
+                {
+                    options.Add(field.Name);
+                    break;
+                }
+        }
+
+        return options;
+    }
+
     private static TypeDeclarationInfo CreateSuccessInfo(INamedTypeSymbol typeSymbol, TypeDeclarationSyntax syntax,
-        bool needsSerializable, bool needsIl2Cpp)
+        bool needsSerializable, bool needsNullChecks, bool needsArrayBoundsChecks, bool needsDivideByZeroChecks)
     {
         string namespaceName = typeSymbol.ContainingNamespace.IsGlobalNamespace
             ? string.Empty
@@ -165,7 +186,9 @@ public class AttributeGenerator : IIncrementalGenerator
             typeSymbol.IsValueType,
             accessibility,
             needsSerializable,
-            needsIl2Cpp
+            needsNullChecks,
+            needsArrayBoundsChecks,
+            needsDivideByZeroChecks
         );
     }
 
@@ -211,15 +234,15 @@ public class AttributeGenerator : IIncrementalGenerator
         }
 
         if (info.NeedsSerializableAttribute) sb.AppendLine($"{indent}[global::System.Serializable]");
-        if (info.NeedsIl2CppAttributes)
-        {
+        if (info.NeedsNullChecks)
             sb.AppendLine(
                 $"{indent}[global::Unity.IL2CPP.CompilerServices.Il2CppSetOption(global::Unity.IL2CPP.CompilerServices.Option.NullChecks, false)]");
+        if (info.NeedsArrayBoundsChecks)
             sb.AppendLine(
                 $"{indent}[global::Unity.IL2CPP.CompilerServices.Il2CppSetOption(global::Unity.IL2CPP.CompilerServices.Option.ArrayBoundsChecks, false)]");
+        if (info.NeedsDivideByZeroChecks)
             sb.AppendLine(
                 $"{indent}[global::Unity.IL2CPP.CompilerServices.Il2CppSetOption(global::Unity.IL2CPP.CompilerServices.Option.DivideByZeroChecks, false)]");
-        }
 
         string typeKeyword = info.IsStruct ? "struct" : "class";
         sb.AppendLine($"{indent}{info.Accessibility} partial {typeKeyword} {info.Name}");
@@ -309,13 +332,17 @@ public class AttributeGenerator : IIncrementalGenerator
         public readonly bool IsStruct;
         public readonly string Accessibility;
         public readonly bool NeedsSerializableAttribute;
-        public readonly bool NeedsIl2CppAttributes;
+        public readonly bool NeedsNullChecks;
+        public readonly bool NeedsArrayBoundsChecks;
+        public readonly bool NeedsDivideByZeroChecks;
+
         public List<Diagnostic> Diagnostics { get; }
 
         public bool HasErrors => Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error);
 
         public TypeDeclarationInfo(string name, string ns, List<ParentClassInfo> parentClasses, bool isStruct,
-            string accessibility, bool needsSerializable, bool needsIl2Cpp)
+            string accessibility, bool needsSerializable, bool needsNullChecks, bool needsArrayBoundsChecks,
+            bool needsDivideByZeroChecks)
         {
             Name = name;
             Namespace = ns;
@@ -323,7 +350,9 @@ public class AttributeGenerator : IIncrementalGenerator
             IsStruct = isStruct;
             Accessibility = accessibility;
             NeedsSerializableAttribute = needsSerializable;
-            NeedsIl2CppAttributes = needsIl2Cpp;
+            NeedsNullChecks = needsNullChecks;
+            NeedsArrayBoundsChecks = needsArrayBoundsChecks;
+            NeedsDivideByZeroChecks = needsDivideByZeroChecks;
             Diagnostics = new List<Diagnostic>();
         }
 
@@ -335,7 +364,9 @@ public class AttributeGenerator : IIncrementalGenerator
             IsStruct = false;
             Accessibility = string.Empty;
             NeedsSerializableAttribute = false;
-            NeedsIl2CppAttributes = false;
+            NeedsNullChecks = false;
+            NeedsArrayBoundsChecks = false;
+            NeedsDivideByZeroChecks = false;
             Diagnostics = new List<Diagnostic> { diagnostic };
         }
 
