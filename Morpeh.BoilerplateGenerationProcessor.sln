@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apostasy.GenerationProcessor", "Apostasy.GenerationProcessor\Apostasy.GenerationProcessor.csproj", "{D3EA409B-8F4A-49CE-AE2E-04AE9DC67042}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Morpeh.BoilerplateGenerationProcessor", "Morpeh.BoilerplateGenerationProcessor\Morpeh.BoilerplateGenerationProcessor.csproj", "{D3EA409B-8F4A-49CE-AE2E-04AE9DC67042}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
