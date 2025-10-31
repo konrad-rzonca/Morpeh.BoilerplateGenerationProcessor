@@ -1,52 +1,74 @@
-# Name of the workflow
-name: Build, Test, and Publish NuGet Package
+name: Build, Test, and Create Release
 
 # Run on every push to any branch, AND on pull requests to 'main'
 on:
   push:
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
 jobs:
-  build-test-publish:
-    # Use the latest Ubuntu runner
+  # This job just builds and tests on every commit
+  build-and-test:
     runs-on: ubuntu-latest
-
-    # Set permissions for the GITHUB_TOKEN to allow writing packages
-    permissions:
-      contents: read
-      packages: write
-
     steps:
-      # 1. Check out your repository's code
       - name: Checkout repository
         uses: actions/checkout@v4
-      
-      # 2. Setup the .NET 6 SDK (matches your test project)
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0.x'
-      
-      # 3. Restore dependencies for the solution
+
       - name: Restore dependencies
         run: dotnet restore Morpeh.BoilerplateGenerationProcessor.sln
-      
-      # 4. Build the entire solution in Release configuration
+
       - name: Build
         run: dotnet build Morpeh.BoilerplateGenerationProcessor.sln --configuration Release --no-restore
-      
-      # 5. NEW: Run tests
-      # This will use the test project defined in your solution
+
       - name: Run tests
         run: dotnet test Morpeh.BoilerplateGenerationProcessor.Tests/Morpeh.BoilerplateGenerationProcessor.Tests.csproj --configuration Release --no-build
-      
-      # 6. Pack the generator project (only if build and tests passed)
-      - name: Pack
-        run: dotnet pack Morpeh.BoilerplateGenerationProcessor/Morpeh.BoilerplateGenerationProcessor.csproj --configuration Release --no-build
-      
-      # 7. MODIFIED: Publish the .nupkg file
-      # This step will ONLY run on a push event to the 'main' branch
-      - name: Publish to GitHub Packages
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: dotnet nuget push "Morpeh.BoilerplateGenerationProcessor/bin/Release/*.nupkg" -k ${{ secrets.GITHUB_TOKEN }} -s "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+
+  # This job runs ONLY when you push a new tag starting with 'v'
+  create-release:
+    # This job only runs if the 'build-and-test' job succeeded
+    needs: [build-and-test]
+    # Run only on pushing a tag like "v1.0.0"
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write # Needed to create the release
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore Morpeh.BoilerplateGenerationProcessor.sln
+
+      - name: Build
+        run: dotnet build Morpeh.BoilerplateGenerationProcessor.sln --configuration Release --no-restore
+
+      - name: Create Zip Archive
+        # This zips all the necessary DLLs from the build output folder
+        run: |
+          cd Morpeh.BoilerplateGenerationProcessor/bin/Release/netstandard2.0/
+          zip -r Morpeh.Boilerplate.SourceGenerator.zip .
+          cd ../../../../..
+
+      - name: Create GitHub Release
+        # This popular action creates a release and uploads the zip file
+        uses: softprops/action-gh-release@v1
+        with:
+          # This uses the tag name (e.g., "v1.0.0") as the release name
+          name: Release ${{ github.ref_name }}
+          # This attaches the zip file we just created
+          files: Morpeh.BoilerplateGenerationProcessor/bin/Release/netstandard2.0/Morpeh.Boilerplate.SourceGenerator.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

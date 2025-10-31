@@ -2,84 +2,102 @@
 
 A Roslyn Source Generator for Unity that automatically adds performance-critical attributes (`[Serializable]`, `[Il2CppSetOption]`) to Morpeh components and systems. This reduces boilerplate and improves runtime performance in IL2CPP builds.
 
-## Installation (from GitHub Packages)
+## 🚀 Installation (for Unity Users)
 
-This generator is hosted on GitHub Packages. You only need to build it if you are developing the generator itself.
+This is the simplest way to install the generator. It does **not** require any package manager setup or authentication tokens.
 
-### Step 1: Generate a Personal Access Token (PAT)
+1.  Go to the **[Releases Page](https://github.com/YOUR_USERNAME/Morpeh.BoilerplateGenerationProcessor/releases)** for this repository.
+    > **Note:** Be sure to update the `YOUR_USERNAME` part of the link to your own GitHub account.
 
-To access packages on GitHub, Unity needs a **Personal Access Token (PAT)**.
+2.  Download the `Morpeh.Boilerplate.SourceGenerator.zip` file from the latest release.
 
-1.  Go to your GitHub **Developer Settings** > **Personal access tokens** > **Tokens (classic)**.
-2.  Click **"Generate new token"**.
-3.  Give it a **Note** (e.g., "Unity Package Manager").
-4.  Set the **Expiration** (e.g., 90 days).
-5.  Select the **`read:packages`** scope. This is the only permission needed.
+3.  Create a folder in your Unity project. The recommended location is `Assets/Plugins/RoslynAnalyzers`.
 
-6.  Click **"Generate token"** and **copy the token string** (e.g., `ghp_...`). You will not see it again.
+4.  **Unzip all the DLLs** from the downloaded file directly into that new folder (e.g., `Morpeh.BoilerplateGenerationProcessor.dll`, `Microsoft.CodeAnalysis.dll`, etc.).
 
-### Step 2: Configure Unity's UPM for Authentication
+5.  **Configure the DLLs in Unity.** This is the most important step.
+    * In the Unity Editor, navigate to the folder where you unzipped the files.
+    * Select **all** the DLLs you just unzipped.
+    * In the Inspector, uncheck **Any Platform** and check **Editor** only.
+    * Click **Apply**.
 
-You must tell Unity's Package Manager how to authenticate with GitHub. The safest way is to store this token in a config file *outside* your project.
 
-1.  Find your global UPM config file.
-    * **Windows:** `%APPDATA%\Unity\upmconfig.toml`
-    * **macOS / Linux:** `~/Library/Unity/upmconfig.toml` (or `~/.config/Unity/upmconfig.toml` on some Linux distros)
-2.  If this file doesn't exist, create it.
-3.  Add the following lines, replacing `YOUR_PAT_HERE` with the token you just copied:
 
-    ```toml
-    [npmAuth."[https://nuget.pkg.github.com](https://nuget.pkg.github.com)"]
-    token = "YOUR_PAT_HERE"
-    email = "your-email@example.com"
-    alwaysAuth = true
-    ```
+6.  **Tag the Analyzer.**
+    * With all the DLLs still selected, deselect all of them **except** for `Morpeh.BoilerplateGenerationProcessor.dll`.
+    * In the Inspector, find the "Asset Labels" section at the bottom.
+    * Type **`RoslynAnalyzer`** into the box and press Enter.
+    * Click **Apply** again.
 
-### Step 3: Add the GitHub Package Registry to Your Project
 
-Now, tell your *specific* Unity project where to find the package.
 
-1.  Open your project's `Packages/manifest.json` file.
-2.  Add the following `scopedRegistries` section to it.
-3.  **Crucially, change `YOUR_GITHUB_USERNAME`** to your GitHub username or organization name (the owner of the repository).
+7.  **Restart the Unity Editor.** The generator is now active and will automatically process your Morpeh files.
 
-    ```json
-    {
-      "dependencies": {
-        "com.unity.modules.physics": "1.0.0",
-        // ... your other dependencies
-      },
-      "scopedRegistries": [
-        {
-          "name": "GitHub Packages",
-          "url": "[https://nuget.pkg.github.com/YOUR_GITHUB_USERNAME](https://nuget.pkg.github.com/YOUR_GITHUB_USERNAME)",
-          "scopes": [
-            "morpeh.boilerplate"
-          ]
-        }
-      ]
-    }
-    ```
-    * The `scopes` array tells Unity to look for any package starting with `morpeh.boilerplate` at this new URL.
+---
 
-### Step 4: Install the Package
+## 📝 Usage Rules
 
-1.  **Restart the Unity Editor** to make sure it loads the new `upmconfig.toml` and `manifest.json` settings.
-2.  Go to **Window > Package Manager**.
-3.  Click the `+` button in the top-left and select **"Add package by name..."**.
-4.  Enter the `PackageId` from your `.csproj`:
-    `Morpeh.Boilerplate.SourceGenerator`
-5.  Click **"Add"**.
+The generator applies attributes to any non-static, `partial` type that implements one of the following Morpeh interfaces:
+* `Scellecs.Morpeh.IComponent`
+* `Scellecs.Morpeh.ISystem` (and related interfaces like `IInitializer`, `IFixedSystem`, etc.)
 
-The Package Manager will now authenticate with GitHub, download your package, and install it. The source generator will be active immediately.
+---
 
-## Managing Versions
+### Morpeh Components
+Must be `partial`.
+
+```csharp
+// Before
+public struct MyComponent : IComponent { /* ... */ }
+.
+// After applying fix (making it partial)
+public partial struct MyComponent : IComponent { /* ... */ }
+```
+
+---
+
+### Morpeh Systems
+Must be `partial`.
+
+```csharp
+// Before
+public sealed class MySystem : ISystem { /* ... */ }
+
+// After applying fix (making it partial)
+public sealed partial class MySystem : ISystem { /* ... */ }
+```
+
+---
+
+## ⚠️ Limitations
+
+* **Static Classes:** **Must be annotated manually.** The generator cannot process `static` classes because they cannot be `partial`.
+* **Nested Types in Static Classes:** A Morpeh component or system **cannot** be nested inside a `static` class. This is because the generator needs to create a `partial` declaration for the parent class, which is not allowed for `static` classes.
+
+---
+
+## 🔍 Diagnostics
+
+* **MORPEH001 (Warning):** If a Morpeh component or system is missing the `partial` keyword, the generator will produce a warning in the Unity Console.
+* **MORPEH002 (Error):** An internal generator error occurred during processing.
+* **MORPEH003 (Info):** A `partial struct` is found that does not implement `IComponent`, suggesting it might be a candidate for being a Morpeh component.
+* **MORPEH004 (Error):** A Morpeh type is nested inside a `static` class, which is not supported.
+
+---
+
+## 📦 How to Publish a New Version (for Developers)
+
+This repository is configured with a GitHub Action (`.github/workflows/dotnet-release.yml`) that automatically builds, tests, and creates a release.
 
 To publish a new version:
-1.  Change the `<Version>1.0.1</Version>` tag in `Morpeh.BoilerplateGenerationProcessor.csproj`.
-2.  Commit and push this change to the `main` branch.
-3.  The GitHub Action will automatically build and publish version `1.0.1`.
-4.  You can now update the package in the Unity Package Manager.
+1.  Ensure your code changes are committed to the `main` branch.
+2.  Create a new Git tag that starts with `v` (e.g., `v1.0.1`, `v1.1.0`).
+    ```sh
+    git tag v1.0.1
+    ```
+3.  Push the tag to GitHub.
+    ```sh
+    git push origin v1.0.1
+    ```
 
-## Usage Rules
-(Keep the rest of your README the same: Usage Rules, Limitations, Diagnostics...)
+The GitHub Action will detect this new tag, run the build and tests, and then automatically create a new GitHub Release. It will attach the properly-built `Morpeh.Boilerplate.SourceGenerator.zip` file to that release, making it available for users to download.
