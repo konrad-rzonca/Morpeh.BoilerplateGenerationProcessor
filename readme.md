@@ -39,10 +39,14 @@ The generator applies attributes to any non-static, `partial` type that implemen
     public sealed partial class MySystem : ISystem { /* ... */ }
     ```
 
+### Limitations
+
 -   **Static Classes:** **Must be annotated manually.** The generator cannot process `static` classes because they cannot be `partial`.
+-   **Nested Types in Static Classes:** A Morpeh component or system **cannot** be nested inside a `static` class. This is because the generator needs to create a `partial` declaration for the parent class, which is not allowed for `static` classes.
 
 ### Diagnostics
 
 -   **MORPEH001 (Warning):** If a Morpeh component or system is missing the `partial` keyword, the generator will produce a warning in the Unity Console.
 -   **MORPEH002 (Error):** An internal generator error occurred during processing.
 -   **MORPEH003 (Info):** A `partial struct` is found that does not implement `IComponent`, suggesting it might be a candidate for being a Morpeh component.
+-   **MORPEH004 (Error):** A Morpeh type is nested inside a `static` class, which is not supported.
