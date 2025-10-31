@@ -10,6 +10,8 @@
         <PackageId>Morpeh.Boilerplate.SourceGenerator</PackageId>
         <Description>Generates IL2CPP optimization attributes for Morpeh components and systems.</Description>
 
+        <DevelopmentDependency>true</DevelopmentDependency>
+
         <Authors>konrad-rzonca</Authors>
 
         <IncludeBuildOutput>false</IncludeBuildOutput>
