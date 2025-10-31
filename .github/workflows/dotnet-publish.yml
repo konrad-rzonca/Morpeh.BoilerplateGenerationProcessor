@@ -3,9 +3,9 @@ name: Build, Test, and Create Release
 # Run on every push to any branch, AND on pull requests to 'main'
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "master" ]
 
 jobs:
   # This job just builds and tests on every commit
