@@ -5,13 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="06fd9830-05fd-4ac3-8677-3a29a6217be7" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Apostasy.GenerationProcessor/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Apostasy.GenerationProcessor/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Apostasy.GenerationProcessor/.idea/indexLayout.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Apostasy.GenerationProcessor/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Apostasy.GenerationProcessor.sln" beforeDir="false" afterPath="$PROJECT_DIR$/Morpeh.BoilerplateGenerationProcessor.sln" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Apostasy.GenerationProcessor/Apostasy.GenerationProcessor.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/Morpeh.BoilerplateGenerationProcessor/Morpeh.BoilerplateGenerationProcessor.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Apostasy.GenerationProcessor/MorpehComponentAttributeGenerator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Morpeh.BoilerplateGenerationProcessor/MorpehBoilerplateGenerationProcessor.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Apostasy.GenerationProcessor/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Apostasy.GenerationProcessor/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Morpeh.BoilerplateGenerationProcessor.sln" beforeDir="false" afterPath="$PROJECT_DIR$/Morpeh.BoilerplateGenerationProcessor.sln" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Morpeh.BoilerplateGenerationProcessor/Morpeh.BoilerplateGenerationProcessor.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/Morpeh.BoilerplateGenerationProcessor/Morpeh.BoilerplateGenerationProcessor.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Morpeh.BoilerplateGenerationProcessor/MorpehBoilerplateGenerationProcessor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Morpeh.BoilerplateGenerationProcessor/MorpehBoilerplateGenerationProcessor.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,6 +21,12 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/0db06c86da4d42158a497de456bcc8dacef08/79/a9cdf715/Nullable`1.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/44dc7cd1e8355abc767da448e92ecb5e9ad5c42d60b1c93374d237d0a01eae/IncrementalContexts.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/649aa0f3897de8cf94edb98be3b1f215d6a59c1ee18c328829c2975951bdc/IIncrementalGenerator.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/f9ce152eb11d9e67f54e9b36cd42b68cf1a7a6e377b9540c24daff913eb45da/SyntaxKind.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Morpeh.BoilerplateGenerationProcessor.Tests/GeneratorTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock://C:/Users/Konrad/RiderProjects/Apostasy.GenerationProcessor/Morpeh.BoilerplateGenerationProcessor/MorpehBoilerplateGenerationProcessor.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Morpeh.BoilerplateGenerationProcessor/MorpehBoilerplateGenerationProcessor.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
@@ -55,7 +60,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1761912633056</updated>
-      <workItem from="1761912634131" duration="3666000" />
+      <workItem from="1761912634131" duration="10456000" />
     </task>
     <task id="LOCAL-00001" summary="Library">
       <option name="closed" value="true" />
@@ -65,7 +70,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761914752912</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Library">
+      <option name="closed" value="true" />
+      <created>1761916821587</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1761916821587</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

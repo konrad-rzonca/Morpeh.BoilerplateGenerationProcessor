@@ -4,11 +4,28 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <Version>1.0.0</Version>
+
+        <!-- Additions for Packaging -->
+        <IsPackable>true</IsPackable>
+        <PackageId>Morpeh.Boilerplate.SourceGenerator</PackageId>
+        <Description>Generates IL2CPP optimization attributes for Morpeh components and systems.</Description>
+        <Authors>YourName</Authors>
+        <!-- This ensures the generator DLL is placed in the 'analyzers' folder in the NuGet package -->
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+
+        <!-- Disable missing XML documentation warnings for generated code -->
+        <NoWarn>$(NoWarn);CS1591</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.4.0" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0" PrivateAssets="all" />
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3" PrivateAssets="all" />
+    </ItemGroup>
+
+    <!-- This section includes the compiled generator DLL in the package -->
+    <ItemGroup>
+        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
 
 </Project>
