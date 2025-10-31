@@ -44,7 +44,7 @@ jobs:
         if: github.event_name == 'push'
         run: |
           cd Morpeh.BoilerplateGenerationProcessor/bin/Release/netstandard2.0/
-          zip -r ../../../../../artifacts/zip/Morpeh.Boilerplate.SourceGenerator.zip .
+          zip -r ../../../../artifacts/zip/Morpeh.Boilerplate.SourceGenerator.zip .
         shell: bash
 
       # Upload both artifacts for the release job
