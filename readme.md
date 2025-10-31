@@ -7,7 +7,6 @@ A Roslyn Source Generator for Unity that automatically adds performance-critical
 This is the simplest way to install the generator. It does **not** require any package manager setup or authentication tokens.
 
 1.  Go to the **[Releases Page](https://github.com/konrad-rzonca/Morpeh.BoilerplateGenerationProcessor/releases)** for this repository.
-    > **Note:** Be sure to update the `YOUR_USERNAME` part of the link to your own GitHub account.
 
 2.  Download the `Morpeh.Boilerplate.SourceGenerator.zip` file from the latest release.
 
